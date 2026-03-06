@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FedRetire — Federal Employee Retirement Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04080f;--surface:#080f1a;--card:#0c1525;--card2:#101d30;
+  --border:#162236;--border2:#1e3352;
+  --text:#dce8f8;--muted:#6b87a8;--dim:#334d6b;
+  --gold:#f0b429;--gold2:#ffd166;
+  --teal:#00d9b8;--sky:#38b6f5;--rose:#f06292;
+  --green:#4ade80;--orange:#fb923c;--purple:#c084fc;
+  --font-head:'Syne',sans-serif;
+  --font-body:'IBM Plex Sans',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── HEADER ── */
+.app-header{
+  background:linear-gradient(135deg,#060e1c 0%,#0a1628 60%,#0d1f38 100%);
+  border-bottom:1px solid var(--border2);
+  padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:12px;padding:14px 0}
+.logo-badge{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  box-shadow:0 0 16px rgba(240,180,41,0.35);
+}
+.logo-text{font-family:var(--font-head);font-size:20px;font-weight:800;letter-spacing:-0.02em}
+.logo-text span{color:var(--gold)}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;padding:10px 0}
+.tab-btn{
+  padding:8px 18px;border-radius:6px;border:1px solid transparent;
+  background:transparent;color:var(--muted);font-family:var(--font-body);font-size:12px;
+  font-weight:600;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;
+  transition:all 0.18s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text);border-color:var(--border2)}
+.tab-btn.active{background:rgba(240,180,41,0.1);border-color:var(--gold);color:var(--gold)}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;padding:24px 28px;max-width:1300px;margin:0 auto}
+.tab-panel.active{display:block}
+
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-size:10px;font-family:var(--font-head);font-weight:700;letter-spacing:0.12em;
+  text-transform:uppercase;margin-bottom:14px;
+}
+
+/* ── TWO-COL LAYOUT ── */
+.two-col{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.two-col-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:20px;
+}
+.card-title{
+  font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+
+/* ── SLIDERS ── */
+.sl-group{margin-bottom:16px}
+.sl-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.sl-lbl{font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.sl-val{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:600}
+.sl-track{position:relative;height:3px;background:#0d1c2e;border-radius:2px;cursor:pointer}
+.sl-fill{position:absolute;left:0;top:0;height:100%;border-radius:2px;pointer-events:none}
+.sl-thumb{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 8px rgba(0,0,0,0.5)}
+input[type=range]{position:absolute;top:50%;transform:translateY(-50%);width:100%;height:18px;opacity:0;cursor:pointer;margin:0}
+.sl-gold .sl-fill{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.sl-gold .sl-thumb{background:var(--gold2);box-shadow:0 0 8px rgba(240,180,41,0.5)}
+.sl-teal .sl-fill{background:linear-gradient(90deg,var(--teal),var(--sky))}
+.sl-teal .sl-thumb{background:var(--sky);box-shadow:0 0 8px rgba(56,182,245,0.5)}
+.sl-rose .sl-fill{background:linear-gradient(90deg,var(--rose),var(--purple))}
+.sl-rose .sl-thumb{background:var(--purple);box-shadow:0 0 8px rgba(192,132,252,0.5)}
+.sl-green .sl-fill{background:linear-gradient(90deg,var(--green),var(--teal))}
+.sl-green .sl-thumb{background:var(--green);box-shadow:0 0 8px rgba(74,222,128,0.5)}
+
+/* ── TOGGLE PILLS ── */
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.pill{
+  padding:6px 14px;border-radius:20px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);font-size:11px;font-weight:600;
+  font-family:var(--font-body);cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;
+}
+.pill:hover{border-color:var(--text);color:var(--text)}
+.pill.on-gold{border-color:var(--gold);background:rgba(240,180,41,0.1);color:var(--gold)}
+.pill.on-teal{border-color:var(--teal);background:rgba(0,217,184,0.1);color:var(--teal)}
+.pill.on-sky{border-color:var(--sky);background:rgba(56,182,245,0.1);color:var(--sky)}
+.pill.on-rose{border-color:var(--rose);background:rgba(240,98,146,0.1);color:var(--rose)}
+
+/* ── STAT CARDS (big numbers) ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat-card{
+  background:var(--card2);border-radius:8px;padding:14px 16px;
+  border-top:3px solid;border-left:1px solid var(--border);
+  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.stat-card .s-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;font-family:var(--font-head);font-weight:700}
+.stat-card .s-val{font-family:var(--font-mono);font-size:20px;font-weight:600}
+.stat-card .s-sub{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* ── STAT ROW TABLE ── */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-row .sr-lbl{font-size:12px;color:var(--muted)}
+.stat-row .sr-val{font-family:var(--font-mono);font-size:12px;font-weight:600}
+
+/* ── BAR SEGMENTS ── */
+.seg-bar{margin-bottom:10px}
+.seg-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px}
+.seg-track{height:6px;background:#0a1624;border-radius:3px;overflow:hidden}
+.seg-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
+.seg-total{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+
+/* ── INSIGHT BOX ── */
+.insight{border-radius:6px;padding:10px 12px;margin-bottom:8px;display:none}
+.insight.show{display:block}
+.insight b{display:block;font-size:11px;font-weight:700;margin-bottom:2px}
+.insight p{font-size:11px;color:var(--muted);line-height:1.5}
+.ins-gold{background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.2)}
+.ins-gold b{color:var(--gold)}
+.ins-teal{background:rgba(0,217,184,0.07);border:1px solid rgba(0,217,184,0.2)}
+.ins-teal b{color:var(--teal)}
+.ins-rose{background:rgba(240,98,146,0.07);border:1px solid rgba(240,98,146,0.2)}
+.ins-rose b{color:var(--rose)}
+.ins-sky{background:rgba(56,182,245,0.07);border:1px solid rgba(56,182,245,0.2)}
+.ins-sky b{color:var(--sky)}
+.ins-green{background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.2)}
+.ins-green b{color:var(--green)}
+
+/* ── INPUT FIELD ── */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
+.field input,.field select{
+  width:100%;padding:9px 12px;background:#07111e;border:1px solid var(--border2);
+  border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:13px;
+  outline:none;transition:border-color 0.15s;
+}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.field select option{background:#07111e}
+.ticker-row{display:flex;gap:8px}
+.ticker-row input{flex:1}
+.btn{
+  padding:9px 16px;border-radius:6px;border:1px solid var(--border2);
+  background:rgba(240,180,41,0.1);color:var(--gold);font-family:var(--font-body);
+  font-size:12px;font-weight:700;letter-spacing:0.05em;cursor:pointer;
+  transition:all 0.15s;white-space:nowrap;
+}
+.btn:hover{background:rgba(240,180,41,0.18);border-color:var(--gold)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-teal{background:rgba(0,217,184,0.1);color:var(--teal);border-color:rgba(0,217,184,0.3)}
+.btn-teal:hover{background:rgba(0,217,184,0.18);border-color:var(--teal)}
+
+/* ── CHART CANVAS ── */
+.chart-wrap{position:relative;margin-top:12px}
+canvas{width:100%!important;border-radius:8px}
+
+/* ── MINI TABLE ── */
+.mini-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.mini-table th{text-align:left;padding:6px 8px;color:var(--dim);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.mini-table td{padding:6px 8px;border-bottom:1px solid var(--border);font-family:var(--font-mono)}
+.mini-table tr:last-child td{border-bottom:none}
+.mini-table .pos{color:var(--green)}.mini-table .neg{color:var(--rose)}
+
+/* ── TICKER STATUS ── */
+.ticker-status{font-size:11px;margin-top:6px;min-height:16px}
+.ts-loading{color:var(--muted)}
+.ts-ok{color:var(--green)}
+.ts-err{color:var(--rose)}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{height:10px;background:#0a1624;border-radius:5px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:5px;transition:width 0.5s ease}
+
+/* ── COAST FIRE DIAL ── */
+.coast-summary{text-align:center;padding:20px 0}
+.coast-big{font-family:var(--font-mono);font-size:40px;font-weight:700;color:var(--gold)}
+.coast-lbl{font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px}
+.coast-status{display:inline-block;margin-top:12px;padding:6px 18px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.05em}
+
+/* ── DISCLAIMER ── */
+.disclaimer{margin-top:16px;padding:10px 14px;background:#06101a;border:1px solid var(--border);border-radius:6px;font-size:10px;color:var(--dim);line-height:1.6}
+
+/* ── DIVIDER ── */
+hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .two-col,.three-col,.two-col-eq{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .app-header{flex-direction:column;align-items:flex-start;gap:4px;padding:12px 16px}
+  .tabs{overflow-x:auto;width:100%}
+  .tab-panel{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HEADER ════════════════ -->
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-badge">🦅</div>
+    <div>
+      <div class="logo-text">Fed<span>Retire</span></div>
+      <div class="logo-sub">Federal Employee Retirement Suite · 2026 Tax Year</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('withdrawal',this)">💼 Withdrawal Optimizer</button>
+    <button class="tab-btn" onclick="switchTab('coastfire',this)">🏖️ Coast FIRE</button>
+    <button class="tab-btn" onclick="switchTab('invest',this)">📈 Investment Calculator</button>
+  </nav>
+</header>
+
+<!-- ════════════════ TAB 1 · WITHDRAWAL OPTIMIZER ════════════════ -->
+<div class="tab-panel active" id="tab-withdrawal">
+  <div class="two-col">
+
+    <!-- LEFT: Inputs -->
+    <div>
+      <!-- Profile -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--gold)">👤 Federal Employee Profile</div>
+        <div class="sec-label" style="color:var(--muted)">Filing Status</div>
+        <div class="pill-row" id="wd-filing">
+          <button class="pill on-gold" data-v="single" onclick="wdFiling('single',this)">Single</button>
+          <button class="pill" data-v="mfj" onclick="wdFiling('mfj',this)">Married (MFJ)</button>
+        </div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Age</span><span class="sl-val" id="wv-age">65 yrs</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-age"></div><div class="sl-thumb" id="wt-age"></div><input type="range" id="ws-age" min="50" max="85" step="1" value="65" oninput="wdSlide('age',this.value,'',' yrs')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Years of FERS Service</span><span class="sl-val" id="wv-yos">25 yrs</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-yos"></div><div class="sl-thumb" id="wt-yos"></div><input type="range" id="ws-yos" min="1" max="41" step="1" value="25" oninput="wdSlide('yos',this.value,'',' yrs')"></div>
+        </div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">High-3 Average Salary</span><span class="sl-val" id="wv-hi3">$85,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-hi3"></div><div class="sl-thumb" id="wt-hi3"></div><input type="range" id="ws-hi3" min="30000" max="250000" step="1000" value="85000" oninput="wdSlide('hi3',this.value,'$','')"></div>
+        </div>
+      </div>
+
+      <!-- Spending -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--sky)">💸 Annual Spending Goal</div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Target Annual Spending</span><span class="sl-val" id="wv-spend">$80,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-spend"></div><div class="sl-thumb" id="wt-spend"></div><input type="range" id="ws-spend" min="20000" max="300000" step="1000" value="80000" oninput="wdSlide('spend',this.value,'$','')"></div>
+        </div>
+      </div>
+
+      <!-- Pre-Tax Accounts -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--orange)">🏦 Pre-Tax Accounts</div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">TSP Traditional Balance</span><span class="sl-val" id="wv-tsp">$400,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-tsp"></div><div class="sl-thumb" id="wt-tsp"></div><input type="range" id="ws-tsp" min="0" max="2000000" step="5000" value="400000" oninput="wdSlide('tsp',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Traditional IRA Balance</span><span class="sl-val" id="wv-tira">$50,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-tira"></div><div class="sl-thumb" id="wt-tira"></div><input type="range" id="ws-tira" min="0" max="500000" step="5000" value="50000" oninput="wdSlide('tira',this.value,'$','')"></div>
+        </div>
+      </div>
+
+      <!-- Post-Tax Accounts -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--teal)">🌿 Post-Tax Accounts</div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Roth TSP Balance</span><span class="sl-val" id="wv-rtsp">$100,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-rtsp"></div><div class="sl-thumb" id="wt-rtsp"></div><input type="range" id="ws-rtsp" min="0" max="800000" step="5000" value="100000" oninput="wdSlide('rtsp',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Roth IRA Balance</span><span class="sl-val" id="wv-rira">$80,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-rira"></div><div class="sl-thumb" id="wt-rira"></div><input type="range" id="ws-rira" min="0" max="500000" step="5000" value="80000" oninput="wdSlide('rira',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-rose">
+          <div class="sl-row"><span class="sl-lbl">Taxable Brokerage</span><span class="sl-val" id="wv-brok">$75,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-brok"></div><div class="sl-thumb" id="wt-brok"></div><input type="range" id="ws-brok" min="0" max="1000000" step="5000" value="75000" oninput="wdSlide('brok',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-rose">
+          <div class="sl-row"><span class="sl-lbl">Cost Basis (Brokerage)</span><span class="sl-val" id="wv-basis">$50,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="wf-basis"></div><div class="sl-thumb" id="wt-basis"></div><input type="range" id="ws-basis" min="0" max="75000" step="1000" value="50000" oninput="wdSlide('basis',this.value,'$','')"></div>
+        </div>
+      </div>
+
+      <!-- Strategy -->
+      <div class="card">
+        <div class="card-title" style="color:var(--purple)">⚖️ Withdrawal Strategy</div>
+        <div class="pill-row" id="wd-strat">
+          <button class="pill on-gold" data-v="optimal" onclick="wdStrat('optimal',this)">Tax-Optimal</button>
+          <button class="pill" data-v="pretax" onclick="wdStrat('pretax',this)">Pre-Tax First</button>
+          <button class="pill" data-v="roth" onclick="wdStrat('roth',this)">Roth First</button>
+          <button class="pill" data-v="taxable" onclick="wdStrat('taxable',this)">Taxable First</button>
+        </div>
+      </div>
+    </div><!-- /left -->
+
+    <!-- RIGHT: Results -->
+    <div>
+      <!-- Summary Stats -->
+      <div class="stat-grid" id="wd-stats">
+        <div class="stat-card" style="border-top-color:var(--gold)">
+          <div class="s-lbl">FERS Pension</div>
+          <div class="s-val" id="ws-pension" style="color:var(--gold)">$0</div>
+          <div class="s-sub" id="ws-pension-pct">0% of High-3</div>
+        </div>
+        <div class="stat-card" style="border-top-color:var(--rose)">
+          <div class="s-lbl">Federal Tax</div>
+          <div class="s-val" id="ws-tax" style="color:var(--rose)">$0</div>
+          <div class="s-sub" id="ws-eff">0.0% effective rate</div>
+        </div>
+        <div class="stat-card" style="border-top-color:var(--teal)">
+          <div class="s-lbl">Net Spendable</div>
+          <div class="s-val" id="ws-net" style="color:var(--teal)">$0</div>
+          <div class="s-sub" id="ws-goal">—</div>
+        </div>
+      </div>
+
+      <!-- Income Sources -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--gold)">📊 Income Sources</div>
+        <div class="seg-bar">
+          <div class="seg-row"><span>FERS Pension (Guaranteed)</span><span class="sr-val" id="seg-v-pension" style="color:var(--gold)">$0</span></div>
+          <div class="seg-track"><div class="seg-fill" id="seg-pension" style="background:var(--gold)"></div></div>
+        </div>
+        <div class="seg-bar">
+          <div class="seg-row"><span>Social Security (Est.)</span><span class="sr-val" id="seg-v-ss" style="color:var(--gold2)">$0</span></div>
+          <div class="seg-track"><div class="seg-fill" id="seg-ss" style="background:var(--gold2)"></div></div>
+        </div>
+        <div class="seg-bar">
+          <div class="seg-row"><span>Pre-Tax Withdrawal (TSP/IRA)</span><span class="sr-val" id="seg-v-pt" style="color:var(--orange)">$0</span></div>
+          <div class="seg-track"><div class="seg-fill" id="seg-pt" style="background:var(--orange)"></div></div>
+        </div>
+        <div class="seg-bar">
+          <div class="seg-row"><span>Roth Withdrawal (Tax-Free)</span><span class="sr-val" id="seg-v-roth" style="color:var(--teal)">$0</span></div>
+          <div class="seg-track"><div class="seg-fill" id="seg-roth" style="background:var(--teal)"></div></div>
+        </div>
+        <div class="seg-bar">
+          <div class="seg-row"><span>Brokerage Withdrawal</span><span class="sr-val" id="seg-v-brok" style="color:var(--sky)">$0</span></div>
+          <div class="seg-track"><div class="seg-fill" id="seg-brok" style="background:var(--sky)"></div></div>
+        </div>
+        <div class="seg-total">
+          <span style="font-size:12px;color:var(--muted)">Total Gross Income</span>
+          <span class="sr-val" id="seg-total" style="font-family:var(--font-mono);font-size:15px;font-weight:700">$0</span>
+        </div>
+      </div>
+
+      <!-- Detailed Breakdown -->
+      <div class="two-col-eq" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-title" style="color:var(--sky)">📋 Full Breakdown</div>
+          <div class="stat-row"><span class="sr-lbl">FERS Pension</span><span class="sr-val" id="br-pension" style="color:var(--gold)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">FERS COLA (estimated)</span><span class="sr-val" id="br-cola" style="color:var(--muted)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Social Security (est.)</span><span class="sr-val" id="br-ss" style="color:var(--gold2)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Pre-Tax Withdrawal</span><span class="sr-val" id="br-pt" style="color:var(--orange)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Roth Withdrawal</span><span class="sr-val" id="br-roth" style="color:var(--teal)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Brokerage Withdrawal</span><span class="sr-val" id="br-brok" style="color:var(--sky)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">LTCG Portion</span><span class="sr-val" id="br-ltcg" style="color:var(--dim)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Federal Tax Owed</span><span class="sr-val" id="br-tax" style="color:var(--rose)">$0</span></div>
+          <div class="stat-row" style="border-top:2px solid var(--border2);margin-top:4px;padding-top:10px"><span class="sr-lbl" style="font-weight:700;color:var(--text)">Net Spendable</span><span class="sr-val" id="br-net" style="color:var(--teal);font-size:14px">$0</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--purple)">💡 Tax Insights</div>
+          <div class="insight ins-gold" id="wi-rmd"><b>⚡ RMD Required</b><p id="wi-rmd-t">Minimum required distribution applies.</p></div>
+          <div class="insight ins-teal" id="wi-conv"><b>💡 Roth Conversion Room</b><p id="wi-conv-t">Space available in lower brackets.</p></div>
+          <div class="insight ins-sky" id="wi-ltcg"><b>📈 Capital Gains</b><p id="wi-ltcg-t">Brokerage gains may be taxed at 0–20%.</p></div>
+          <div class="insight ins-green" id="wi-zero"><b>🎉 Zero Federal Tax</b><p>Your income falls within the standard deduction!</p></div>
+          <div class="insight ins-rose" id="wi-short"><b>⚠️ Spending Shortfall</b><p id="wi-short-t">Balances may be insufficient.</p></div>
+          <div id="wi-none" style="font-size:11px;color:var(--dim);padding:8px 0">Your plan looks solid — no major flags.</div>
+          <hr class="div">
+          <div class="card-title" style="color:var(--sky);margin-bottom:10px">Strategy Comparison</div>
+          <div id="wd-cmp"></div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <strong style="color:var(--dim)">Disclaimer:</strong> FERS pension uses the standard 1% multiplier (1.1% if age 62+ with 20+ years). Social Security is estimated at 40% of salary. This calculator uses 2026 federal tax brackets. State taxes, FEHB premiums, Medicare IRMAA, and survivor benefits are not modeled. Consult a financial advisor before making retirement decisions.
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-withdrawal -->
+
+<!-- ════════════════ TAB 2 · COAST FIRE ════════════════ -->
+<div class="tab-panel" id="tab-coastfire">
+  <div class="two-col">
+    <!-- LEFT: Inputs -->
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--gold)">🏖️ Coast FIRE Inputs</div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Current Age</span><span class="sl-val" id="cv-age">35 yrs</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-age"></div><div class="sl-thumb" id="ct-age"></div><input type="range" id="cs-age" min="22" max="70" step="1" value="35" oninput="cfSlide('age',this.value,'',' yrs')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Retirement Age (Target)</span><span class="sl-val" id="cv-ret">62 yrs</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-ret"></div><div class="sl-thumb" id="ct-ret"></div><input type="range" id="cs-ret" min="50" max="75" step="1" value="62" oninput="cfSlide('ret',this.value,'',' yrs')"></div>
+        </div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Annual Spending in Retirement</span><span class="sl-val" id="cv-spend">$70,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-spend"></div><div class="sl-thumb" id="ct-spend"></div><input type="range" id="cs-spend" min="20000" max="250000" step="1000" value="70000" oninput="cfSlide('spend',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-rose">
+          <div class="sl-row"><span class="sl-lbl">Safe Withdrawal Rate</span><span class="sl-val" id="cv-swr">4.0%</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-swr"></div><div class="sl-thumb" id="ct-swr"></div><input type="range" id="cs-swr" min="2.5" max="6" step="0.1" value="4.0" oninput="cfSlide('swr',this.value,'','%')"></div>
+        </div>
+        <div class="sl-group sl-green">
+          <div class="sl-row"><span class="sl-lbl">Expected Return (pre-retirement)</span><span class="sl-val" id="cv-ret-r">7.0%</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-ret-r"></div><div class="sl-thumb" id="ct-ret-r"></div><input type="range" id="cs-ret-r" min="2" max="14" step="0.1" value="7.0" oninput="cfSlide('ret-r',this.value,'','%')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Post-Retirement Return</span><span class="sl-val" id="cv-post-r">5.0%</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-post-r"></div><div class="sl-thumb" id="ct-post-r"></div><input type="range" id="cs-post-r" min="1" max="10" step="0.1" value="5.0" oninput="cfSlide('post-r',this.value,'','%')"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--teal)">💰 Current Savings</div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Total Invested Assets (All Accounts)</span><span class="sl-val" id="cv-saved">$120,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-saved"></div><div class="sl-thumb" id="ct-saved"></div><input type="range" id="cs-saved" min="0" max="2000000" step="5000" value="120000" oninput="cfSlide('saved',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Annual Contribution</span><span class="sl-val" id="cv-contrib">$23,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-contrib"></div><div class="sl-thumb" id="ct-contrib"></div><input type="range" id="cs-contrib" min="0" max="100000" step="500" value="23000" oninput="cfSlide('contrib',this.value,'$','')"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--gold)">🏛️ Federal Pension Offset</div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Expected FERS Pension (Annual)</span><span class="sl-val" id="cv-pension">$20,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-pension"></div><div class="sl-thumb" id="ct-pension"></div><input type="range" id="cs-pension" min="0" max="100000" step="500" value="20000" oninput="cfSlide('pension',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Expected Social Security (Annual)</span><span class="sl-val" id="cv-ss">$18,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="cf-ss"></div><div class="sl-thumb" id="ct-ss"></div><input type="range" id="cs-ss" min="0" max="60000" step="500" value="18000" oninput="cfSlide('ss',this.value,'$','')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div>
+      <!-- Big Coast Number -->
+      <div class="card" style="margin-bottom:16px;text-align:center">
+        <div class="card-title" style="color:var(--gold);text-align:left">🎯 Your Coast FIRE Status</div>
+        <div class="coast-summary">
+          <div class="coast-big" id="cf-coast-num">$0</div>
+          <div class="coast-lbl">Coast FIRE Number</div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted)">Amount needed today to coast to your FIRE number by retirement age</div>
+          <div class="coast-status" id="cf-status-badge">Calculating...</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="cf-progress" style="background:linear-gradient(90deg,var(--teal),var(--gold))"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px">
+          <span>$0</span><span id="cf-progress-label">0% of Coast FIRE</span><span id="cf-coast-num-sm">$0</span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card" style="border-top-color:var(--gold)">
+          <div class="s-lbl">FIRE Number</div>
+          <div class="s-val" id="cf-fire-num" style="color:var(--gold)">$0</div>
+          <div class="s-sub">Total nest egg needed</div>
+        </div>
+        <div class="stat-card" style="border-top-color:var(--teal)">
+          <div class="s-lbl">Coast By Age</div>
+          <div class="s-val" id="cf-coast-age" style="color:var(--teal)">—</div>
+          <div class="s-sub">When you can stop contributing</div>
+        </div>
+        <div class="stat-card" style="border-top-color:var(--sky)">
+          <div class="s-lbl">Projected at Retirement</div>
+          <div class="s-val" id="cf-proj" style="color:var(--sky)">$0</div>
+          <div class="s-sub">Estimated portfolio value</div>
+        </div>
+      </div>
+
+      <div class="two-col-eq" style="margin-top:16px;margin-bottom:16px">
+        <div class="card">
+          <div class="card-title" style="color:var(--teal)">📋 Key Milestones</div>
+          <div class="stat-row"><span class="sr-lbl">Net FIRE Number (after pension/SS)</span><span class="sr-val" id="cf-net-fire" style="color:var(--gold)">$0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Pension + SS Covers</span><span class="sr-val" id="cf-covered" style="color:var(--teal)">$0/yr</span></div>
+          <div class="stat-row"><span class="sr-lbl">Portfolio Must Cover</span><span class="sr-val" id="cf-port-need" style="color:var(--orange)">$0/yr</span></div>
+          <div class="stat-row"><span class="sr-lbl">Years to Retirement</span><span class="sr-val" id="cf-yrs" style="color:var(--sky)">0</span></div>
+          <div class="stat-row"><span class="sr-lbl">Current Savings Rate Implied</span><span class="sr-val" id="cf-sr" style="color:var(--purple)">—</span></div>
+          <div class="stat-row"><span class="sr-lbl">Projected at Current Contributions</span><span class="sr-val" id="cf-proj2" style="color:var(--green)">$0</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--purple)">💡 Insights</div>
+          <div class="insight ins-green" id="ci-coasted"><b>🏖️ Already Coasting!</b><p id="ci-coasted-t">You've hit your Coast FIRE number.</p></div>
+          <div class="insight ins-gold" id="ci-close"><b>⚡ Almost There</b><p id="ci-close-t">You're close to your Coast FIRE number.</p></div>
+          <div class="insight ins-teal" id="ci-fers"><b>🏛️ FERS Advantage</b><p id="ci-fers-t">Your pension reduces portfolio needs.</p></div>
+          <div class="insight ins-sky" id="ci-mra"><b>📅 MRA Note</b><p>FERS Minimum Retirement Age is typically 57 for those born after 1969.</p></div>
+          <div id="ci-none" style="font-size:11px;color:var(--dim);padding:8px 0">Keep contributing — you're building toward your Coast FIRE number.</div>
+        </div>
+      </div>
+
+      <!-- Coast FIRE Table -->
+      <div class="card">
+        <div class="card-title" style="color:var(--gold)">📅 Year-by-Year Projection</div>
+        <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
+          <table class="mini-table">
+            <thead><tr><th>Age</th><th>Portfolio</th><th>Coast Needed</th><th>Status</th></tr></thead>
+            <tbody id="cf-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TAB 3 · INVESTMENT CALCULATOR ════════════════ -->
+<div class="tab-panel" id="tab-invest">
+  <div class="two-col">
+    <!-- LEFT: Inputs -->
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--gold)">📈 Investment Parameters</div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Initial Investment</span><span class="sl-val" id="iv-init">$10,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="if-init"></div><div class="sl-thumb" id="it-init"></div><input type="range" id="is-init" min="0" max="500000" step="1000" value="10000" oninput="inSlide('init',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-teal">
+          <div class="sl-row"><span class="sl-lbl">Monthly Contribution</span><span class="sl-val" id="iv-monthly">$1,000</span></div>
+          <div class="sl-track"><div class="sl-fill" id="if-monthly"></div><div class="sl-thumb" id="it-monthly"></div><input type="range" id="is-monthly" min="0" max="10000" step="50" value="1000" oninput="inSlide('monthly',this.value,'$','')"></div>
+        </div>
+        <div class="sl-group sl-green">
+          <div class="sl-row"><span class="sl-lbl">Annual Return Rate</span><span class="sl-val" id="iv-rate">7.0%</span></div>
+          <div class="sl-track"><div class="sl-fill" id="if-rate"></div><div class="sl-thumb" id="it-rate"></div><input type="range" id="is-rate" min="0" max="20" step="0.1" value="7.0" oninput="inSlide('rate',this.value,'','%')"></div>
+        </div>
+        <div class="sl-group sl-rose">
+          <div class="sl-row"><span class="sl-lbl">Investment Period</span><span class="sl-val" id="iv-years">20 yrs</span></div>
+          <div class="sl-track"><div class="sl-fill" id="if-years"></div><div class="sl-thumb" id="it-years"></div><input type="range" id="is-years" min="1" max="50" step="1" value="20" oninput="inSlide('years',this.value,'',' yrs')"></div>
+        </div>
+        <div class="sl-group sl-gold">
+          <div class="sl-row"><span class="sl-lbl">Inflation Rate</span><span class="sl-val" id="iv-inf">2.5%</span></div>
+          <div class="sl-track"><div class="sl-fill" id="if-inf"></div><div class="sl-thumb" id="it-inf"></div><input type="range" id="is-inf" min="0" max="8" step="0.1" value="2.5" oninput="inSlide('inf',this.value,'','%')"></div>
+        </div>
+      </div>
+
+      <!-- Ticker Lookup -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="color:var(--sky)">🔍 Live Stock Ticker</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">Enter a stock ticker to fetch recent price data and use its annualized return as your rate. Uses Yahoo Finance via public API.</p>
+        <div class="field">
+          <label>Stock / ETF Ticker Symbol</label>
+          <div class="ticker-row">
+            <input type="text" id="ticker-input" placeholder="e.g. SPY, AAPL, VOO" style="text-transform:uppercase">
+            <button class="btn btn-teal" id="ticker-btn" onclick="fetchTicker()">Fetch</button>
+          </div>
+          <div class="ticker-status" id="ticker-status"></div>
+        </div>
+        <div id="ticker-result" style="display:none">
+          <div class="two-col-eq" style="gap:10px;margin-top:10px">
+            <div style="background:#06101a;border-radius:6px;padding:12px;border:1px solid var(--border)">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em">Current Price</div>
+              <div class="s-val" id="tk-price" style="font-family:var(--font-mono);font-size:18px;color:var(--sky)">—</div>
+            </div>
+            <div style="background:#06101a;border-radius:6px;padding:12px;border:1px solid var(--border)">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em">1-Yr Return</div>
+              <div class="s-val" id="tk-return" style="font-family:var(--font-mono);font-size:18px">—</div>
+            </div>
+          </div>
+          <div id="tk-info" style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5"></div>
+          <button class="btn btn-teal" style="margin-top:10px;width:100%" onclick="applyTickerRate()">Apply Return Rate to Calculator</button>
+        </div>
+      </div>
+
+      <!-- TSP Fund Compare -->
+      <div class="card">
+        <div class="card-title" style="color:var(--purple)">🏛️ TSP Fund Presets</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Select a TSP fund to apply its historical average annual return.</p>
+        <div class="pill-row" style="flex-wrap:wrap">
+          <button class="pill" onclick="applyTSP(10.4,'G Fund (Treasury)')">G Fund</button>
+          <button class="pill" onclick="applyTSP(8.0,'F Fund (Bond Index)')">F Fund</button>
+          <button class="pill" onclick="applyTSP(12.5,'C Fund (S&P 500)')">C Fund</button>
+          <button class="pill" onclick="applyTSP(10.8,'S Fund (Small Cap)')">S Fund</button>
+          <button class="pill" onclick="applyTSP(8.6,'I Fund (Int\'l)')">I Fund</button>
+          <button class="pill" onclick="applyTSP(10.2,'L 2050 Lifecycle')">L 2050</button>
+          <button class="pill" onclick="applyTSP(8.8,'L 2040 Lifecycle')">L 2040</button>
+          <button class="pill" onclick="applyTSP(7.2,'L Income')">L Income</button>
+        </div>
+        <div id="tsp-applied" style="font-size:11px;color:var(--teal);margin-top:6px;min-height:16px"></div>
+      </div>
+    </div><!-- /left -->
+
+    <!-- RIGHT: Results -->
+    <div>
+      <div class="stat-grid">
+        <div class="stat-card" style="border-top-color:var(--gold)">
+          <div class="s-lbl">Final Portfolio Value</div>
+          <div class="s-val" id="in-final" style="color:var(--gold)">$0</div>
+          <div class="s-sub" id="in-final-real">$0 in today's dollars</div>
+        </div>
+        <div class="stat-card" style="border-top-color:var(--teal)">
+          <div class="s-lbl">Total Contributed</div>
+          <div class="s-val" id="in-contrib" style="color:var(--teal)">$0</div>
+          <div class="s-sub" id="in-contrib-pct">0% of final value</div>
+        </div>
+        <div class="stat-card" style="border-top-color:var(--sky)">
+          <div class="s-lbl">Investment Gains</div>
+          <div class="s-val" id="in-gains" style="color:var(--sky)">$0</div>
+          <div class="s-sub" id="in-gains-pct">0x return</div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="card" style="margin:16px 0">
+        <div class="card-title" style="color:var(--sky)">📊 Growth Chart</div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="inv-chart"></canvas>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--muted)">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--gold);border-radius:2px;margin-right:4px"></span>Total Value</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--border2);border-radius:2px;margin-right:4px"></span>Amount Contributed</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(0,217,184,0.3);border-radius:2px;margin-right:4px"></span>Investment Gains</span>
+        </div>
+      </div>
+
+      <!-- Year Table -->
+      <div class="card">
+        <div class="card-title" style="color:var(--purple)">📅 Milestone Years</div>
+        <div style="overflow-x:auto">
+          <table class="mini-table">
+            <thead><tr><th>Year</th><th>Age (if 35)</th><th>Balance</th><th>Contributed</th><th>Gains</th><th>Real Value</th></tr></thead>
+            <tbody id="inv-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="disclaimer" style="margin-top:16px">
+        <strong style="color:var(--dim)">Disclaimer:</strong> Stock data is retrieved from public Yahoo Finance API and may be delayed or unavailable. Historical returns do not guarantee future performance. TSP fund returns are approximate long-term averages and will vary. This tool is for educational purposes only.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ CHART.JS ════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+function fmt(n,dec=0){return '$'+Math.round(n).toLocaleString('en-US')}
+function fmtPct(r){return(r*100).toFixed(1)+'%'}
+function fmtK(n){if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return fmt(n)}
+function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v}
+function setWidth(id,pct){var e=document.getElementById(id);if(e)e.style.width=Math.min(100,Math.max(0,pct))+'%'}
+function show(id){var e=document.getElementById(id);if(e)e.classList.add('show')}
+function hide(id){var e=document.getElementById(id);if(e)e.classList.remove('show')}
+
+function slideUpdate(prefix,id,val,min,max,pfx,sfx){
+  var pct=(val-min)/(max-min)*100;
+  document.getElementById(prefix+'f-'+id).style.width=pct+'%';
+  document.getElementById(prefix+'t-'+id).style.left=pct+'%';
+  setText(prefix+'v-'+id, pfx+parseFloat(val).toLocaleString('en-US')+sfx);
+}
+
+// ══════════════════════════════════════════════════════════
+// 2026 TAX DATA
+// ══════════════════════════════════════════════════════════
+var BRACKETS={
+  single:[{min:0,max:12400,r:0.10},{min:12400,max:50400,r:0.12},{min:50400,max:105700,r:0.22},{min:105700,max:201775,r:0.24},{min:201775,max:256225,r:0.32},{min:256225,max:640600,r:0.35},{min:640600,max:Infinity,r:0.37}],
+  mfj:[{min:0,max:24800,r:0.10},{min:24800,max:100800,r:0.12},{min:100800,max:211400,r:0.22},{min:211400,max:403550,r:0.24},{min:403550,max:512450,r:0.32},{min:512450,max:768700,r:0.35},{min:768700,max:Infinity,r:0.37}]
+};
+var LTCG={
+  single:[{max:49450,r:0},{max:545500,r:0.15},{max:Infinity,r:0.20}],
+  mfj:[{max:98900,r:0},{max:613700,r:0.15},{max:Infinity,r:0.20}]
+};
+var DED={single:16100,mfj:32200};
+var TOP12={single:50400,mfj:100800};
+var TOP22={single:105700,mfj:211400};
+
+function calcOrdTax(inc,brackets){
+  var tax=0,rem=inc;
+  for(var i=0;i<brackets.length;i++){if(rem<=0)break;var b=brackets[i];var chunk=Math.min(rem,b.max-b.min);if(chunk>0){tax+=chunk*b.r;rem-=chunk;}}
+  return tax;
+}
+function calcTax(ptW,filing,guaranteed,ltcg){
+  var ded=DED[filing],br=BRACKETS[filing],lbr=LTCG[filing];
+  var total=ptW+guaranteed+ltcg;
+  var agi=Math.max(0,total-ded);
+  var ordInc=Math.max(0,agi-ltcg);
+  var oTax=calcOrdTax(ordInc,br);
+  var ltcgTax=0,lrem=Math.min(ltcg,agi),base=ordInc;
+  for(var i=0;i<lbr.length;i++){if(lrem<=0)break;var b=lbr[i];var sp=Math.max(0,b.max-base);var ch=Math.min(lrem,sp);ltcgTax+=ch*b.r;base+=ch;lrem-=ch;}
+  return{total:oTax+ltcgTax,eff:total>0?(oTax+ltcgTax)/total:0};
+}
+function getMarginal(inc,filing){
+  var ded=DED[filing],br=BRACKETS[filing],ti=Math.max(0,inc-ded);
+  for(var i=0;i<br.length;i++){if(ti<=br[i].max)return br[i].r;}
+  return 0.37;
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB SWITCH
+// ══════════════════════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='invest')drawChart();
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB 1 · WITHDRAWAL
+// ══════════════════════════════════════════════════════════
+var WD={age:65,yos:25,hi3:85000,spend:80000,tsp:400000,tira:50000,rtsp:100000,rira:80000,brok:75000,basis:50000,filing:'single',strat:'optimal'};
+
+function wdSlide(id,val,pfx,sfx){
+  WD[id]=parseFloat(val);
+  // sync basis max
+  if(id==='brok'){var bi=document.getElementById('ws-basis');bi.max=WD.brok;if(WD.basis>WD.brok){WD.basis=WD.brok;bi.value=WD.brok;slideUpdate('w','basis',WD.brok,0,WD.brok,'$','');}}
+  slideUpdate('w',id,val,parseFloat(document.getElementById('ws-'+id).min),parseFloat(document.getElementById('ws-'+id).max),pfx,sfx);
+  wdCalc();
+}
+function wdFiling(v,btn){
+  WD.filing=v;
+  document.querySelectorAll('#wd-filing .pill').forEach(function(b){b.className='pill'});
+  btn.className='pill on-gold';
+  wdCalc();
+}
+function wdStrat(v,btn){
+  WD.strat=v;
+  document.querySelectorAll('#wd-strat .pill').forEach(function(b){b.className='pill'});
+  btn.className='pill on-gold';
+  wdCalc();
+}
+
+function wdCalc(){
+  var s=WD;
+  // FERS Pension: 1% * yos * hi3 (1.1% if age 62+ and yos>=20)
+  var mult=(s.age>=62&&s.yos>=20)?0.011:0.01;
+  var pension=mult*s.yos*s.hi3;
+  var ss=s.hi3*0.40*0.75; // rough estimate: 40% of salary * 75% for SS taxation reduction
+  var guaranteed=pension+ss;
+  var need=Math.max(0,s.spend-guaranteed);
+  var isRMD=s.age>=73;
+  var rmd=isRMD?s.tsp/26.5:0;
+  var preTaxBal=s.tsp+s.tira;
+  var rothBal=s.rtsp+s.rira;
+  var ptW=0,rW=0,bW=0,ltcg=0;
+  var gainRatio=s.brok>0?Math.max(0,s.brok-s.basis)/s.brok:0;
+
+  if(s.strat==='pretax'){
+    ptW=Math.min(need,preTaxBal);
+    var r1=need-ptW;rW=Math.min(r1,rothBal);var r2=r1-rW;bW=Math.min(r2,s.brok);
+  } else if(s.strat==='roth'){
+    rW=Math.min(need,rothBal);
+    var r1=need-rW;bW=Math.min(r1,s.brok);var r2=r1-bW;ptW=Math.min(r2,preTaxBal);
+  } else if(s.strat==='taxable'){
+    bW=Math.min(need,s.brok);
+    var r1=need-bW;ptW=Math.min(r1,preTaxBal);var r2=r1-ptW;rW=Math.min(r2,rothBal);
+  } else { // optimal
+    var ded=DED[s.filing],top12=TOP12[s.filing];
+    var maxPT=Math.max(0,top12+ded-guaranteed);
+    ptW=Math.min(need,maxPT,preTaxBal);
+    if(isRMD){ptW=Math.max(rmd,ptW);ptW=Math.min(ptW,need,preTaxBal);}
+    var after=need-ptW;
+    bW=Math.min(after,s.brok);
+    var after2=after-bW;
+    rW=Math.min(after2,rothBal);
+  }
+  ltcg=bW*gainRatio;
+  var totalW=ptW+rW+bW;
+  var shortfall=Math.max(0,need-totalW);
+  var tr=calcTax(ptW,s.filing,guaranteed,ltcg);
+  var marginal=getMarginal(ptW+guaranteed,s.filing);
+  var net=guaranteed+totalW-tr.total;
+  var convRoom=Math.max(0,TOP22[s.filing]+DED[s.filing]-(ptW+guaranteed));
+  var totalIncome=guaranteed+totalW;
+
+  // Update stats
+  setText('ws-pension',fmt(pension));
+  setText('ws-pension-pct',fmtPct(pension/s.hi3)+' of High-3');
+  setText('ws-tax',fmt(tr.total));
+  setText('ws-eff',fmtPct(tr.eff)+' effective rate');
+  setText('ws-net',fmt(net));
+  var goalEl=document.getElementById('ws-goal');
+  if(shortfall>0){goalEl.textContent='⚠ '+fmt(shortfall)+' shortfall';goalEl.style.color='var(--rose)';}
+  else{goalEl.textContent='✓ Goal met';goalEl.style.color='var(--dim)';}
+
+  // Segments
+  var ti=totalIncome||1;
+  function seg(id,val){setText('seg-v-'+id,fmt(val));setWidth('seg-'+id,val/ti*100);}
+  seg('pension',pension);seg('ss',ss);seg('pt',ptW);seg('roth',rW);seg('brok',bW);
+  setText('seg-total',fmt(totalIncome));
+
+  // Breakdown
+  setText('br-pension',fmt(pension));
+  setText('br-cola',fmt(pension*0.02)+' est.');
+  setText('br-ss',fmt(ss));
+  setText('br-pt',fmt(ptW));setText('br-roth',fmt(rW));setText('br-brok',fmt(bW));
+  setText('br-ltcg',fmt(ltcg));setText('br-tax','−'+fmt(tr.total));setText('br-net',fmt(net));
+
+  // Insights
+  var anyI=false;
+  function ins(id,show,fn){if(show){document.getElementById(id).classList.add('show');anyI=true;if(fn)fn();}else{document.getElementById(id).classList.remove('show');}}
+  ins('wi-rmd',isRMD,function(){setText('wi-rmd-t','Required min. distribution: '+fmt(rmd)+' from TSP.');});
+  ins('wi-conv',convRoom>0&&s.strat==='optimal',function(){setText('wi-conv-t','Convert up to '+fmt(convRoom)+' to Roth before 22% bracket.');});
+  ins('wi-ltcg',ltcg>0,function(){setText('wi-ltcg-t',fmt(ltcg)+' in gains — may qualify for 0–20% LTCG rates.');});
+  ins('wi-zero',tr.total===0,null);
+  ins('wi-short',shortfall>0,function(){setText('wi-short-t',fmt(shortfall)+' shortfall — accounts may be insufficient.');});
+  document.getElementById('wi-none').style.display=anyI?'none':'block';
+
+  // Strategy comparison
+  var strats=[{id:'optimal',label:'Tax-Optimal'},{id:'pretax',label:'Pre-Tax First'},{id:'roth',label:'Roth First'},{id:'taxable',label:'Taxable First'}];
+  var html='';
+  strats.forEach(function(st){
+    var ept=0;
+    if(st.id==='pretax')ept=Math.min(need,preTaxBal);
+    else if(st.id==='roth')ept=Math.max(0,need-rothBal-s.brok);
+    else if(st.id==='taxable')ept=Math.max(0,need-s.brok);
+    else ept=ptW;
+    var est=calcTax(ept,s.filing,guaranteed,0).total;
+    var active=st.id===s.strat;
+    html+='<div onclick="wdStrat(\''+st.id+'\',document.querySelector(\'[data-v='+st.id+']\'))" style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:5px;margin-bottom:3px;cursor:pointer;background:'+(active?'rgba(240,180,41,0.08)':'transparent')+';border:1px solid '+(active?'rgba(240,180,41,0.3)':'transparent')+'">'
+      +'<span style="font-size:12px;color:'+(active?'var(--gold)':'var(--muted)')+'">'+st.label+'</span>'
+      +'<span style="font-family:var(--font-mono);font-size:12px;color:'+(active?'var(--gold)':'var(--dim)')+'">'+fmt(est)+'</span>'
+      +'</div>';
+  });
+  document.getElementById('wd-cmp').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB 2 · COAST FIRE
+// ══════════════════════════════════════════════════════════
+var CF={age:35,ret:62,spend:70000,swr:4.0,retR:7.0,postR:5.0,saved:120000,contrib:23000,pension:20000,ss:18000};
+
+function cfSlide(id,val,pfx,sfx){
+  var key=id.replace('-','R').replace('-','R');
+  // manual key map
+  var km={'age':'age','ret':'ret','spend':'spend','swr':'swr','ret-r':'retR','post-r':'postR','saved':'saved','contrib':'contrib','pension':'pension','ss':'ss'};
+  CF[km[id]]=parseFloat(val);
+  var el=document.getElementById('cs-'+id);
+  slideUpdate('c',id,val,parseFloat(el.min),parseFloat(el.max),pfx,sfx);
+  cfCalc();
+}
+
+function cfCalc(){
+  var s=CF;
+  var yrs=Math.max(1,s.ret-s.age);
+  var guaranteedIncome=s.pension+s.ss;
+  var portNeed=Math.max(0,s.spend-guaranteedIncome);
+  var fireNum=portNeed/(s.swr/100);
+  // Net FIRE number (portfolio only needs to cover what pension+SS doesn't)
+  var rr=s.retR/100,pr=s.postR/100;
+  // Coast FIRE: how much needed today to grow to fireNum by retirement with no contributions
+  var coastNum=fireNum/Math.pow(1+rr,yrs);
+  // Projected value with contributions
+  var proj=s.saved*Math.pow(1+rr,yrs);
+  var annualContrib=s.contrib;
+  // FV of contributions
+  if(rr>0)proj+=annualContrib*((Math.pow(1+rr,yrs)-1)/rr);
+  else proj+=annualContrib*yrs;
+
+  // Coast age: when do we no longer need to contribute?
+  var coastAge=null;
+  var tempBal=s.saved;
+  for(var a=s.age;a<=s.ret;a++){
+    var needed=fireNum/Math.pow(1+rr,s.ret-a);
+    if(tempBal>=needed&&coastAge===null)coastAge=a;
+    tempBal=(tempBal+annualContrib)*(1+rr);
+  }
+
+  // Progress
+  var progress=s.saved/coastNum*100;
+
+  setText('cf-coast-num',fmtK(coastNum));
+  setText('cf-coast-num-sm',fmtK(coastNum));
+  setText('cf-fire-num',fmtK(fireNum));
+  setText('cf-coast-age',coastAge!==null?coastAge+' yrs':'At retirement');
+  setText('cf-proj',fmtK(proj));
+  setText('cf-net-fire',fmtK(fireNum));
+  setText('cf-covered',fmt(guaranteedIncome)+'/yr');
+  setText('cf-port-need',fmt(portNeed)+'/yr');
+  setText('cf-yrs',yrs+' years');
+  setText('cf-sr','~'+((annualContrib/(s.saved+annualContrib||1))*100).toFixed(0)+'% savings');
+  setText('cf-proj2',fmtK(proj));
+  setWidth('cf-progress',progress);
+  setText('cf-progress-label',Math.min(progress,999).toFixed(0)+'% of Coast FIRE');
+
+  var badge=document.getElementById('cf-status-badge');
+  if(s.saved>=coastNum){badge.textContent='🏖️ Already Coasting!';badge.style.background='rgba(74,222,128,0.15)';badge.style.color='var(--green)';badge.style.border='1px solid rgba(74,222,128,0.4)';}
+  else if(progress>=80){badge.textContent='⚡ Almost There ('+progress.toFixed(0)+'%)';badge.style.background='rgba(240,180,41,0.15)';badge.style.color='var(--gold)';badge.style.border='1px solid rgba(240,180,41,0.4)';}
+  else{badge.textContent='🚀 Building Toward Coast ('+progress.toFixed(0)+'%)';badge.style.background='rgba(56,182,245,0.1)';badge.style.color='var(--sky)';badge.style.border='1px solid rgba(56,182,245,0.3)';}
+
+  // Insights
+  var anyI=false;
+  function ci(id,show,fn){if(show){document.getElementById(id).classList.add('show');anyI=true;if(fn)fn();}else{document.getElementById(id).classList.remove('show');}}
+  ci('ci-coasted',s.saved>=coastNum,function(){setText('ci-coasted-t','Current savings of '+fmt(s.saved)+' already exceeds your Coast FIRE number of '+fmtK(coastNum)+'!');});
+  ci('ci-close',progress>=70&&progress<100,function(){setText('ci-close-t','You\'re '+progress.toFixed(0)+'% of the way — just '+fmt(coastNum-s.saved)+' more to go.');});
+  ci('ci-fers',guaranteedIncome>0,function(){setText('ci-fers-t','Your pension + SS ('+fmt(guaranteedIncome)+'/yr) reduces portfolio needs by '+fmtK(guaranteedIncome/(s.swr/100))+'.');});
+  ci('ci-mra',s.ret<57,null);
+  document.getElementById('ci-none').style.display=anyI?'none':'block';
+
+  // Table
+  var rows='',bal=s.saved;
+  for(var a=s.age;a<=s.ret;a++){
+    var coastNeed=fireNum/Math.pow(1+rr,s.ret-a);
+    var isCoast=bal>=coastNeed;
+    var status=isCoast?'<span class="pos">✓ Coasting</span>':'<span class="neg">Contributing</span>';
+    if(a===s.age||(a-s.age)%5===0||a===s.ret){
+      rows+='<tr><td>'+a+'</td><td>'+fmtK(bal)+'</td><td>'+fmtK(coastNeed)+'</td><td>'+status+'</td></tr>';
+    }
+    bal=(bal+annualContrib)*(1+rr);
+  }
+  document.getElementById('cf-table').innerHTML=rows;
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB 3 · INVESTMENT CALC
+// ══════════════════════════════════════════════════════════
+var IN={init:10000,monthly:1000,rate:7.0,years:20,inf:2.5};
+var invChart=null;
+
+function inSlide(id,val,pfx,sfx){
+  IN[id]=parseFloat(val);
+  var el=document.getElementById('is-'+id);
+  slideUpdate('i',id,val,parseFloat(el.min),parseFloat(el.max),pfx,sfx);
+  inCalc();
+}
+
+function applyTSP(rate,name){
+  IN.rate=rate;
+  var el=document.getElementById('is-rate');
+  el.value=rate;
+  slideUpdate('i','rate',rate,0,20,'','%');
+  setText('tsp-applied','Applied: '+name+' ('+rate+'% avg annual return)');
+  inCalc();
+}
+
+function inCalc(){
+  var s=IN;
+  var r=s.rate/100,months=s.years*12,monthly=s.monthly,inf=s.inf/100;
+  var bal=s.init,totalContrib=s.init,labels=[],vals=[],contribs=[],gains=[];
+  var milestones=[];
+
+  for(var yr=1;yr<=s.years;yr++){
+    for(var m=0;m<12;m++){bal=bal*(1+r/12)+monthly;totalContrib+=monthly;}
+    var real=bal/Math.pow(1+inf,yr);
+    labels.push('Yr '+yr);vals.push(Math.round(bal));contribs.push(Math.round(totalContrib));gains.push(Math.round(bal-totalContrib));
+    if(yr%5===0||yr===1||yr===s.years)milestones.push({yr,bal,totalContrib,gains:bal-totalContrib,real,age:35+yr});
+  }
+
+  var finalBal=vals[vals.length-1]||0;
+  var finalContrib=contribs[contribs.length-1]||0;
+  var finalGains=gains[gains.length-1]||0;
+  var finalReal=finalBal/Math.pow(1+inf,s.years);
+
+  setText('in-final',fmtK(finalBal));
+  setText('in-final-real',fmtK(finalReal)+' in today\'s dollars');
+  setText('in-contrib',fmtK(finalContrib));
+  setText('in-contrib-pct',fmtPct(finalContrib/finalBal||0)+' of final value');
+  setText('in-gains',fmtK(finalGains));
+  setText('in-gains-pct',(finalBal/finalContrib||1).toFixed(2)+'x return');
+
+  // Table
+  var rows='';
+  milestones.forEach(function(m){
+    rows+='<tr>'
+      +'<td>'+m.yr+'</td>'
+      +'<td>'+m.age+'</td>'
+      +'<td class="pos">'+fmtK(m.bal)+'</td>'
+      +'<td>'+fmtK(m.totalContrib)+'</td>'
+      +'<td class="pos">'+fmtK(m.gains)+'</td>'
+      +'<td style="color:var(--muted)">'+fmtK(m.real)+'</td>'
+      +'</tr>';
+  });
+  document.getElementById('inv-table').innerHTML=rows;
+
+  drawChart(labels,vals,contribs,gains);
+}
+
+function drawChart(labels,vals,contribs,gains){
+  var canvas=document.getElementById('inv-chart');
+  if(!canvas)return;
+  if(!labels){
+    // recalc silently
+    var s=IN,r=s.rate/100,monthly=s.monthly;
+    labels=[];vals=[];contribs=[];gains=[];
+    var bal=s.init,tc=s.init;
+    for(var yr=1;yr<=s.years;yr++){
+      for(var m=0;m<12;m++){bal=bal*(1+r/12)+monthly;tc+=monthly;}
+      if(s.years<=20||yr%2===0||yr===s.years){labels.push('Yr '+yr);vals.push(Math.round(bal));contribs.push(Math.round(tc));gains.push(Math.round(bal-tc));}
+    }
+  }
+  if(invChart)invChart.destroy();
+  invChart=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[
+        {label:'Total Value',data:vals,borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,0.08)',borderWidth:2,pointRadius:0,fill:true,tension:0.4},
+        {label:'Contributed',data:contribs,borderColor:'#1e3352',backgroundColor:'rgba(30,51,82,0.5)',borderWidth:1.5,pointRadius:0,fill:true,tension:0.4},
+        {label:'Gains',data:gains,borderColor:'rgba(0,217,184,0.5)',backgroundColor:'rgba(0,217,184,0.05)',borderWidth:1,pointRadius:0,fill:false,tension:0.4}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0c1525',titleColor:'#dce8f8',bodyColor:'#6b87a8',borderColor:'#162236',borderWidth:1,callbacks:{label:function(c){return' '+c.dataset.label+': $'+c.raw.toLocaleString();}}}},
+      scales:{
+        x:{grid:{color:'rgba(22,34,54,0.8)'},ticks:{color:'#334d6b',font:{size:10},maxTicksLimit:10}},
+        y:{grid:{color:'rgba(22,34,54,0.8)'},ticks:{color:'#334d6b',font:{size:10},callback:function(v){return'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v);}}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// TICKER FETCH
+// ══════════════════════════════════════════════════════════
+var lastTickerRate=null;
+function fetchTicker(){
+  var sym=document.getElementById('ticker-input').value.trim().toUpperCase();
+  if(!sym){setText('ticker-status','Please enter a ticker symbol.');return;}
+  var btn=document.getElementById('ticker-btn');
+  btn.disabled=true;
+  var status=document.getElementById('ticker-status');
+  status.className='ticker-status ts-loading';
+  status.textContent='Fetching '+sym+' data...';
+  document.getElementById('ticker-result').style.display='none';
+
+  // Use Yahoo Finance v8 via a CORS proxy or direct
+  var url='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=1y';
+  fetch(url)
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(data){
+      var res=data.chart&&data.chart.result&&data.chart.result[0];
+      if(!res)throw new Error('No data found for '+sym);
+      var meta=res.meta;
+      var closes=res.indicators&&res.indicators.adjclose&&res.indicators.adjclose[0]&&res.indicators.adjclose[0].adjclose;
+      if(!closes||closes.length<2)throw new Error('Insufficient price data');
+      var first=closes.find(function(v){return v!=null});
+      var last=closes[closes.length-1];
+      var retPct=((last-first)/first)*100;
+      var price=meta.regularMarketPrice||last;
+      var name=meta.shortName||sym;
+      lastTickerRate=retPct;
+      status.className='ticker-status ts-ok';
+      status.textContent='✓ '+name+' loaded successfully';
+      setText('tk-price','$'+price.toFixed(2));
+      var retEl=document.getElementById('tk-return');
+      retEl.textContent=retPct.toFixed(1)+'%';
+      retEl.style.color=retPct>=0?'var(--green)':'var(--rose)';
+      setText('tk-info',name+' · 52-wk range: $'+(meta.fiftyTwoWeekLow||'—')+' – $'+(meta.fiftyTwoWeekHigh||'—')+' · 1-year return based on adjusted closing prices.');
+      document.getElementById('ticker-result').style.display='block';
+      btn.disabled=false;
+    })
+    .catch(function(err){
+      status.className='ticker-status ts-err';
+      status.textContent='⚠ Could not fetch '+sym+'. Check ticker or try again. ('+err.message+')';
+      btn.disabled=false;
+    });
+}
+
+function applyTickerRate(){
+  if(lastTickerRate===null)return;
+  var clamped=Math.min(20,Math.max(0,lastTickerRate));
+  IN.rate=clamped;
+  var el=document.getElementById('is-rate');
+  el.value=clamped;
+  slideUpdate('i','rate',clamped,0,20,'','%');
+  setText('tsp-applied','Applied ticker return: '+clamped.toFixed(1)+'%');
+  inCalc();
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT ALL SLIDERS
+// ══════════════════════════════════════════════════════════
+(function init(){
+  // Withdrawal
+  [['age',65,'',' yrs'],['yos',25,'',' yrs'],['hi3',85000,'$',''],['spend',80000,'$',''],
+   ['tsp',400000,'$',''],['tira',50000,'$',''],['rtsp',100000,'$',''],['rira',80000,'$',''],
+   ['brok',75000,'$',''],['basis',50000,'$','']
+  ].forEach(function(a){
+    var el=document.getElementById('ws-'+a[0]);
+    if(el)slideUpdate('w',a[0],a[1],parseFloat(el.min),parseFloat(el.max),a[2],a[3]);
+  });
+
+  // Coast FIRE
+  [['age',35,'',' yrs'],['ret',62,'',' yrs'],['spend',70000,'$',''],['swr',4.0,'','%'],
+   ['ret-r',7.0,'','%'],['post-r',5.0,'','%'],['saved',120000,'$',''],['contrib',23000,'$',''],
+   ['pension',20000,'$',''],['ss',18000,'$','']
+  ].forEach(function(a){
+    var el=document.getElementById('cs-'+a[0]);
+    if(el)slideUpdate('c',a[0],a[1],parseFloat(el.min),parseFloat(el.max),a[2],a[3]);
+  });
+
+  // Investment
+  [['init',10000,'$',''],['monthly',1000,'$',''],['rate',7.0,'','%'],['years',20,'',' yrs'],['inf',2.5,'','%']
+  ].forEach(function(a){
+    var el=document.getElementById('is-'+a[0]);
+    if(el)slideUpdate('i',a[0],a[1],parseFloat(el.min),parseFloat(el.max),a[2],a[3]);
+  });
+
+  wdCalc();cfCalc();inCalc();
+})();
+</script>
+</body>
+</html>
